@@ -30,7 +30,7 @@ ZONE_LINKS = FRAME_WIDTH // 3       # ca. 213 Pixel
 ZONE_RECHTS = (FRAME_WIDTH // 3) * 2 # ca. 426 Pixel
 
 
-STOP_THRESHOLD = 0.25 
+STOP_THRESHOLD = 0.40 
 
 def main():
     parser = argparse.ArgumentParser()
@@ -62,7 +62,7 @@ def main():
         model_path=args.model,
         conf=0.4,           # Nur Objekte mit >40% Sicherheit
         save_annotated=args.show,
-        imgsz=320, 
+        imgsz=640, 
         yolo_classes=None   # None = Alles erkennen. Z.B. [0] = nur Personen.
     )
 
@@ -103,6 +103,15 @@ def main():
                     
                     # LOGIK: Ist das Hindernis nah genug (groß genug)?
                     if height_ratio > STOP_THRESHOLD:
+                        if(obj['label'] == 'person'):
+                            if center_x < ZONE_LINKS:
+                                command = "Links"
+                                LOGGER.info(f"Person LINKS -> Fahre LINKS")
+                            elif center_x > ZONE_RECHTS:
+                                command = "Rechts"
+                                LOGGER.info(f"Person RECHTS -> Fahre RECHTS")
+
+                    else:
                         if center_x < ZONE_LINKS:
                             command = "RECHTS"      # Hindernis links -> rechts ausweichen
                             LOGGER.info(f"HINDERNIS LINKS ({obj['label']}) -> Fahre RECHTS")
